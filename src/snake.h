@@ -21,5 +21,11 @@ class Snake {
         std::deque<Position> body;
         Direction direction;
         void initializeBody (void);
+
         Position getNeighboringPosition (Position position, Direction direction);
+
+        /**
+         * Returns a mod b. Also works with negative numbers as a.
+        */
+        int mod (int a, int b);
 };

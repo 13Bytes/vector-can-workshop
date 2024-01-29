@@ -11,7 +11,7 @@ void Snake::moveUp(void) {
     body.push_front(targetPosition);
     direction = Direction::NORTH;
 
-    if (!game->checkApples(targetPosition)) {
+    if (!game->checkAndConsumeApple(targetPosition)) {
       body.pop_back();
     }
   } else {
@@ -25,7 +25,7 @@ void Snake::moveDown(void) {
     body.push_front(targetPosition);
     direction = Direction::SOUTH;
 
-    if (!game->checkApples(targetPosition)) {
+    if (!game->checkAndConsumeApple(targetPosition)) {
       body.pop_back();
     }
   } else {
@@ -39,7 +39,7 @@ void Snake::moveLeft(void) {
     body.push_front(targetPosition);
     direction = Direction::WEST;
 
-    if (!game->checkApples(targetPosition)) {
+    if (!game->checkAndConsumeApple(targetPosition)) {
       body.pop_back();
     }
   } else {
@@ -53,7 +53,7 @@ void Snake::moveRight(void) {
     body.push_front(targetPosition);
     direction = Direction::EAST;
 
-    if (!game->checkApples(targetPosition)) {
+    if (!game->checkAndConsumeApple(targetPosition)) {
       body.pop_back();
     }
   } else {

@@ -8,6 +8,7 @@ class Game {
     public:
      bool checkApples(Position);
      Position_Vector getApples();
+     Game();
 
     private:
      Snake snake;

@@ -1,3 +1,4 @@
+#include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 #include <CANCommunication.h>
 
@@ -5,19 +6,54 @@
 
 // begin - LED
 #include <Adafruit_NeoPixel.h>
-#define PIN 17 // For microBUS 1
+
+#include "MPU9250.h"
+#define PIN 17  // For microBUS 1
 // #define PIN 13 // For microBUS 2
 #define NUM_PIXELS 100
+MPU9250 mpu;
 Adafruit_NeoPixel LEDs(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 // end - LED
 long currentMillis = 0;
+Game game;
+Snake snake = Snake(game);
+int matrix[101] = {0};
+
+void print_roll_pitch_yaw() {
+  Serial.print("Yaw, Pitch, Roll: ");
+  Serial.print(mpu.getYaw(), 2);
+  Serial.print(", ");
+  Serial.print(mpu.getPitch(), 2);
+  Serial.print(", ");
+  Serial.println(mpu.getRoll(), 2);
+}
+
+int* get_color(int c) {
+  switch (c) {
+    case 1:;
+      break;
+    case 2:
+      return new int[3]{0, 255, 255};
+      break;
+    case 3:
+      return new int[3]{0, 255, 0};
+      break;
+    default:
+      return new int[3]{0, 0, 0};
+      break;
+  }
+}
 
 void setup() {
-  snake Snake();
-
   Serial.begin(115200);
-  //while (!Serial) delay(10);
+  // while (!Serial) delay(10);
+  Wire.begin();
+
   setupCANCommunication();
+
+  mpu.setup(0x68);
+  mpu.calibrateAccelGyro();
+  mpu.calibrateMag();
 
   // Start LEDs
   LEDs.begin();
@@ -25,48 +61,55 @@ void setup() {
   LEDs.clear();
   // Set brightness of all LEDs. [0, 255]
   LEDs.setBrightness(40);
-
-  int matrix[101] = {0};
-
 }
+
+int x_y_to_matrix(int x, int y) { return (y - 1) * 10 + x; }
 
 void loop() {
   currentMillis = millis();
   loopCANCommunication(currentMillis);
 
-  // replace ths contents of the following if statement
-  // with your incoming coordinates update functionality
-  if (packetWaiting) {
-    w_c1.x = r_c1.x + 1;
-    w_c1.y = r_c1.y + 1;
-    w_c1.z = r_c1.z + 1;
-    w_c2.x = r_c2.x + 1;
-    w_c2.y = r_c2.y + 1;
-    w_c2.z = r_c2.z + 1;
-    packetWaiting = false;
-  }
+  Position_Vector apples = game.getApples();
+  //   Position_Vector snake = snake.getBody();
 
-
-  Position_Vector apples = getApples();
-  Position_Vector snake = snake.getBody();
-
-  for (Position p:apples) {
+  for (Position p : apples) {
     matrix[x_y_to_matrix(p.x, p.y)] = 1;
   }
-  
+
   // head other color
-  matrix[x_y_to_matrix(snake[0].x, snake[0].y)] = 2;
-  for (i=1; i<snake.size(); i++) {
-    matrix[x_y_to_matrix(p.x, p.y)] = 3;
+  //   matrix[x_y_to_matrix(snake[0].x, snake[0].y)] = 2;
+  //   for (i = 1; i < snake.size(); i++) {
+  //     matrix[x_y_to_matrix(p.x, p.y)] = 3;
+  //   }
+
+  for (int i = 1; i < NUM_PIXELS + 1; i++) {
+    int color[3] = {0, 255, 0}; //get_color(matrix[i]);
+    LEDs.setPixelColor(i, LEDs.Color(color[0], color[1], color[2]));
+  }
+  LEDs.show();
+
+  if (packetWaiting) {
+    // ... new data arrived
+    if (r_c1.x == 1) {
+      // snake.up()
+    } else if (r_c1.x == 2) {
+      // snake.down()
+    } else if (r_c1.x == 3) {
+      // snake.left()
+    } else if (r_c1.x == 4) {
+      // snake.right()
+    }
+
+    packetWaiting = false;  // don't touch - reset and wait for new message
   }
 
-  for(int i=1; i<NUM_PIXELS+1; i++) {
-    LEDs.setPixelColor(i, LEDs.Color(matrix[i]));
-  }
-    LEDs.show();
-}
-
-int x_y_to_matrix(x, y)
-{
-  return (y-1)*10 + x;
+  // Send data to CAN bus
+  mpu.update();
+  print_roll_pitch_yaw();
+  w_c1.x = mpu.getRoll();
+  w_c1.y = mpu.getPitch();
+  w_c1.z = mpu.getYaw();
+  w_c2.x = mpu.getAccX();
+  w_c2.y = mpu.getAccY();
+  w_c2.z = mpu.getAccZ();
 }

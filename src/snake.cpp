@@ -39,5 +39,31 @@ void Snake::initializeBody (void) {
 }
 
 Position Snake::getNeighboringPosition (Position position, Direction direction) {
-    switch ()
+    Position result;
+    switch (direction) {
+        case NORTH:
+            result = Position {position.x, mod ((position.y + 1) - 1, mapSize) + 1};
+        break;
+
+        case EAST:
+            result = Position {mod ((position.x + 1) - 1, mapSize) + 1, position.y};
+        break;
+
+        case SOUTH:
+            result = Position {position.x, ((position.y - 1) - 1 % mapSize) + 1};
+        break;
+
+        case WEST:
+            result = Position {mod ((position.x - 1) - 1, mapSize) + 1, position.y};
+        break;
+    }
+    return result;
+}
+
+int Snake::mod (int a, int b) {
+    if (a < 0) {
+        return b - (-a % b);
+    } else {
+        return a % b;
+    }
 }

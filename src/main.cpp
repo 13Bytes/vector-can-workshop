@@ -53,7 +53,7 @@ void loop() {
   for (Position p:apples) {
     matrix[x_y_to_matrix(p.x, p.y)] = 1;
   }
-  
+
   // head other color
   matrix[x_y_to_matrix(snake[0].x, snake[0].y)] = 2;
   for (i=1; i<snake.size(); i++) {
@@ -61,7 +61,8 @@ void loop() {
   }
 
   for(int i=1; i<NUM_PIXELS+1; i++) {
-    LEDs.setPixelColor(i, LEDs.Color(matrix[i]));
+    int[3] color = get_color(matrix[i]);
+    LEDs.setPixelColor(i, LEDs.Color(color[0], color[1], color[2]));
   }
     LEDs.show();
 }
@@ -69,4 +70,15 @@ void loop() {
 int x_y_to_matrix(x, y)
 {
   return (y-1)*10 + x;
+}
+
+int[3] get_color(int c)
+{
+  switch(c){
+    case 1: int[3] color = {255,0,0};break;
+    case 2: int[3] color = {0,255,255};break;
+    case 3: int[3] color = {0,255,0};break;
+    default: int[3] color = {0,0,0};break;
+  }
+  return color;
 }

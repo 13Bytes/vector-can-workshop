@@ -1,4 +1,4 @@
-#include <snake.h>
+#include "snake.h"
 
 Snake::Snake (Game game) {
     this->initializeBody();
@@ -7,27 +7,68 @@ Snake::Snake (Game game) {
 
 void Snake::moveUp (void) {
     if (direction != Direction::SOUTH) {
-        if (game.checkApple ())
+        const Position targetPosition = getNeighboringPosition (body.front(), Direction::NORTH);
+        body.push_front (targetPosition);
+        direction = Direction::NORTH;
+        
+        if (!game.checkApples (targetPosition)) {
+            body.pop_back();
+        }
     } else {
         // Illegal move
     }
 }
 
 void Snake::moveDown (void) {
-
+    if (direction != Direction::NORTH) {
+        const Position targetPosition = getNeighboringPosition (body.front(), Direction::SOUTH);
+        body.push_front (targetPosition);
+        direction = Direction::SOUTH;
+        
+        if (!game.checkApples (targetPosition)) {
+            body.pop_back();
+        }
+    } else {
+        // Illegal move
+    }
 }
 
 void Snake::moveLeft (void) {
+    if (direction != Direction::EAST) {
+        const Position targetPosition = getNeighboringPosition (body.front(), Direction::WEST);
+        body.push_front (targetPosition);
+        direction = Direction::WEST;
         
-    if (game.checkApple ())
+        if (!game.checkApples (targetPosition)) {
+            body.pop_back();
+        }
+    } else {
+        // Illegal move
+    }
 }
 
 void Snake::moveRight (void) {
+    if (direction != Direction::WEST) {
+        const Position targetPosition = getNeighboringPosition (body.front(), Direction::EAST);
+        body.push_front (targetPosition);
+        direction = Direction::EAST;
+        
+        if (!game.checkApples (targetPosition)) {
+            body.pop_back();
+        }
+    } else {
+        // Illegal move
+    }
 
 }
 
 Position_Vector Snake::getBody (void) {
-    return this->body;
+    Position_Vector result(body.begin(), body.end());
+    return result;
+}
+
+int Snake::getLength() {
+    return body.size();
 }
 
 void Snake::initializeBody (void) {
@@ -50,7 +91,7 @@ Position Snake::getNeighboringPosition (Position position, Direction direction) 
         break;
 
         case SOUTH:
-            result = Position {position.x, ((position.y - 1) - 1 % mapSize) + 1};
+            result = Position {position.x, mod ((position.y - 1) - 1, mapSize) + 1};
         break;
 
         case WEST:

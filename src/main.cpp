@@ -3,6 +3,8 @@
 #include <CANCommunication.h>
 
 #include "MPU9250.h"
+#include "game.h"
+#include "snake.h"
 
 // NeoPixel
 #define PIN 17
@@ -12,6 +14,27 @@ MPU9250 mpu;
 Adafruit_NeoPixel LEDs(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 long currentMillis = 0;
+
+Game game;
+Snake snake = Snake(&game);
+int matrix[101] = {0};
+
+int* get_color(int c) {
+  switch (c) {
+    case 1:;
+      break;
+    case 2:
+      return new int[3]{0, 255, 255};
+      break;
+    case 3:
+      return new int[3]{0, 255, 0};
+      break;
+    default:
+      return new int[3]{0, 0, 0};
+      break;
+  }
+}
+int x_y_to_matrix(int x, int y) { return (y - 1) * 10 + x; }
 
 void setup() {
   Serial.begin(115200);
@@ -41,35 +64,38 @@ void loop() {
   currentMillis = millis();
   loopCANCommunication(currentMillis);
 
-  for (int i = 0; i < NUM_PIXELS; i++) {
-    // Set color of individual LED
-    LEDs.setPixelColor(i, LEDs.Color(255 - (2 * i), 150, i * 2));
-    // Write to hardware, else nothing would show
-    LEDs.show();
-    delay(20);
-  }
-  for (int i = 0; i < NUM_PIXELS; i++) {
-    // Set color of individual LED
-    LEDs.setPixelColor(i, LEDs.Color(0, 0, 0));
-    // Write to hardware, else nothing would show
-    LEDs.show();
-    delay(20);
-  }
-
   if (packetWaiting) {
     // ... new data arrived
     if (r_c1.x == 1) {
-      // snake.up()
+      snake.moveUp();
     } else if (r_c1.x == 2) {
-      // snake.down()
+      snake.moveDown();
     } else if (r_c1.x == 3) {
-      // snake.left()
+      snake.moveLeft();
     } else if (r_c1.x == 4) {
-      // snake.right()
+      snake.moveRight();
     }
 
     packetWaiting = false;  // don't touch - reset and wait for new message
   }
+
+  Position_Vector apples = game.getApples();
+  Position_Vector snakePos = snake.getBody();
+
+  for (Position p : apples) {
+    matrix[x_y_to_matrix(p.x, p.y)] = 1;
+  }
+
+  // head other color
+  matrix[x_y_to_matrix(snakePos[0].x, snakePos[0].y)] = 2;
+  for (int i = 1; i < snakePos.size(); i++) {
+    matrix[x_y_to_matrix(snakePos[i].x, snakePos[i].y)] = 3;
+  }
+  for (int i = 1; i < NUM_PIXELS + 1; i++) {
+    int color[3] = {0, 255, 0};  // get_color(matrix[i]);
+    LEDs.setPixelColor(i, LEDs.Color(color[0], color[1], color[2]));
+  }
+  LEDs.show();
 
   // Send data to CAN bus
   mpu.update();

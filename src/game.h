@@ -1,14 +1,14 @@
 #pragma once
 
 #include <vector>
-
+#include <algorithm>
 #include "data_structures.h"
 
 class Game {
  public:
-  bool checkApples(Position);
+  bool checkAndConsumeApple(Position);
   Position_Vector getApples();
 
  private:
-  Position_Vector apples;
+  Position_Vector apples = {Position {5, 5}};
 };

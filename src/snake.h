@@ -18,7 +18,7 @@ public:
      *
      * Initializes a new Snake instance with a reference to the game.
      */
-    Snake(Game game);
+    Snake(Game *game);
 
     /**
      * @brief Destructor for Snake.
@@ -69,7 +69,7 @@ public:
 
 private:
     const int mapSize = 10; ///< The size of the game map.
-    Game game; ///< The game instance.
+    Game *game; ///< The game instance.
     std::deque<Position> body; ///< Deque representing the snake's body positions.
     Direction direction; ///< Current direction of the snake's movement.
     

@@ -6,6 +6,8 @@ typedef struct {
     int x, y; 
 } Position;
 
-typedef std::vector<Position> Position_Vector;
+enum Direction {
+    NORTH, EAST, SOUTH, WEST
+};
 
-typedef std::array<int> Matrix;
+typedef std::vector<Position> Position_Vector;

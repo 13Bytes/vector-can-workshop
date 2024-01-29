@@ -25,6 +25,9 @@ void setup() {
   LEDs.clear();
   // Set brightness of all LEDs. [0, 255]
   LEDs.setBrightness(40);
+
+  int matrix[101] = {0};
+
 }
 
 void loop() {
@@ -43,16 +46,27 @@ void loop() {
     packetWaiting = false;
   }
 
-  bool up = false;
-  bool down = false;
-  bool left = false;
-  bool right = false;
 
+  Position_Vector apples = getApples();
+  Position_Vector snake = snake.getBody();
+
+  for (Position p:apples) {
+    matrix[x_y_to_matrix(p.x, p.y)] = 1;
+  }
   
+  // head other color
+  matrix[x_y_to_matrix(snake[0].x, snake[0].y)] = 2;
+  for (i=1; i<snake.size(); i++) {
+    matrix[x_y_to_matrix(p.x, p.y)] = 3;
+  }
 
+  for(int i=1; i<NUM_PIXELS+1; i++) {
+    LEDs.setPixelColor(i, LEDs.Color(matrix[i]));
+  }
+    LEDs.show();
+}
 
-
-
-  // put your code to update the outgoing coordinates
-  // here
+int x_y_to_matrix(x, y)
+{
+  return (y-1)*10 + x;
 }

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
+#include <deque>
 #include "game.h"
 
 class Snake {
     public:
-        Snake (void);
+        Snake (Game game);
         ~Snake (void);
 
         void moveUp (void);
@@ -16,6 +16,10 @@ class Snake {
         Position_Vector getBody (void);
 
     private:
-        Position_Vector body;
+        const int mapSize = 10;
+        Game game;
+        std::deque<Position> body;
+        Direction direction;
         void initializeBody (void);
+        Position getNeighboringPosition (Position position, Direction direction);
 };

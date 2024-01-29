@@ -13,6 +13,4 @@ bool Game::checkApples(Position position) {
   }
 }
 
-Position_Vector Game::getApples() {
-  // Implementation goes here
-}
+Position_Vector Game::getApples() { return this->apples; }
